@@ -1,7 +1,7 @@
 # Facebook SAR Schema Snapshot — 2026-04-28
 
-This is the schema observed in the Meta "Download Your Information" export
-`facebook-***REDACTED***-28_04_2026-NTH22s5t`. **Meta changes this schema
+This is the schema observed in a Meta "Download Your Information" export
+dated 2026-04-28 (folder name redacted). **Meta changes this schema
 without notice.** Re-run `turbo-invention ingest --dry-run --source <path>`
 against any new export and update the parser before processing.
 
