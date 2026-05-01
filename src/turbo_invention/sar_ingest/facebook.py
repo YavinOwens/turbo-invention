@@ -51,13 +51,13 @@ class FacebookParser(SARParser):
         data = json.loads(cf.read_text(encoding="utf-8"))
         items = data.get("comments_v2", []) if isinstance(data, dict) else []
         for i, entry in enumerate(items):
-            for d in entry.get("data", []):
+            for j, d in enumerate(entry.get("data", [])):
                 comment = d.get("comment") or {}
                 text = comment.get("comment", "")
                 if not text:
                     continue
                 yield Document(
-                    id=_hash("fb", "comment", str(cf.name), str(i)),
+                    id=_hash("fb", "comment", str(cf.name), str(i), str(j)),
                     platform="facebook", kind="comment",
                     timestamp=_ts(comment.get("timestamp") or entry.get("timestamp")),
                     text=text,

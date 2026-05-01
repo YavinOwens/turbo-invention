@@ -30,3 +30,20 @@ def test_dry_run_lists_unknown_keys(tmp_path: Path, capsys):
     out = capsys.readouterr().out
     assert "mystery_new_file.json" in out
     assert "weird_new_key" in out
+
+
+def test_comment_ids_unique_when_entry_has_multiple_data_items(tmp_path: Path):
+    import json
+    (tmp_path / "your_facebook_activity/comments_and_reactions").mkdir(parents=True)
+    payload = {"comments_v2": [{
+        "timestamp": 1, "title": "x",
+        "data": [
+            {"comment": {"timestamp": 1, "comment": "first", "author": "Test User"}},
+            {"comment": {"timestamp": 2, "comment": "second", "author": "Test User"}},
+        ],
+    }]}
+    (tmp_path / "your_facebook_activity/comments_and_reactions/comments.json"
+     ).write_text(json.dumps(payload))
+    docs = list(FacebookParser(tmp_path).iter_documents())
+    ids = [d.id for d in docs]
+    assert len(ids) == len(set(ids)) == 2
