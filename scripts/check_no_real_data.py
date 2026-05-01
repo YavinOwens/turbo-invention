@@ -1,9 +1,10 @@
 """Block accidental commit of real SAR / PII data.
 
 Fails (exit 1) if any tracked file path matches a forbidden pattern OR if any
-tracked JSON file contains the real account name 'Yavin Michael Owens'.
+tracked text-like file contains a real account marker (case-insensitive).
 
-Run via pre-push hook and CI.
+Run via pre-push hook and CI. This is a defensive check, not a substitute for
+review — it can only catch known markers.
 """
 from __future__ import annotations
 import subprocess
@@ -12,7 +13,14 @@ from pathlib import Path
 
 FORBIDDEN_PREFIXES = ("data/", "secrets/")
 FORBIDDEN_SUFFIXES = (".env", ".zip", ".tar.gz", ".tgz", ".7z")
-REAL_NAME_MARKERS = ("Yavin Michael Owens", "yavinowens9", "yavinowens87")
+REAL_NAME_MARKERS = ("yavin michael owens", "yavinowens9", "yavinowens87")
+SCANNABLE_SUFFIXES = (
+    ".json", ".jsonl", ".csv", ".tsv", ".txt", ".md", ".html", ".xml",
+    ".yaml", ".yml", ".py", ".ipynb", ".log", ".ndjson",
+)
+# Exempt: this file legitimately contains the markers as detection strings,
+# and the planning docs describe the data context.
+EXEMPT_PATHS = ("scripts/check_no_real_data.py",)
 
 
 def tracked_files() -> list[Path]:
@@ -30,9 +38,11 @@ def main() -> int:
         if any(s.endswith(suf) for suf in FORBIDDEN_SUFFIXES):
             bad.append(f"forbidden suffix: {s}")
             continue
-        if p.suffix == ".json" and p.exists():
+        if s in EXEMPT_PATHS:
+            continue
+        if p.suffix.lower() in SCANNABLE_SUFFIXES and p.exists():
             try:
-                text = p.read_text(encoding="utf-8", errors="ignore")
+                text = p.read_text(encoding="utf-8", errors="ignore").lower()
             except OSError:
                 continue
             for marker in REAL_NAME_MARKERS:
