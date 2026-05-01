@@ -1,6 +1,9 @@
 # internal planning / brainstorming docs — never push
 docs/superpowers/
 
+# local-only PII markers consumed by scripts/check_no_real_data.py
+.real-name-markers
+
 # venvs
 .venv/
 venv/
